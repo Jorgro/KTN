@@ -4,6 +4,7 @@
 from socket import *
 import argparse as ap
 import getpass as gp
+import time
 
 #Get sender_email and recipient_email as arguments to the program
 parser = ap.ArgumentParser(description='A test SMTP client without authentication')
@@ -21,7 +22,7 @@ toMail = args.toMail #Recipient's email address
 #password = gp.getpass(prompt='Password: ')
 
 # Message to send
-msg = "\r\n I love computer networks!"
+message_text = "\r\n I love computer networks!"
 endmsg = "\r\n.\r\n"
 
 # Our mail server is smtp.stud.ntnu.no but it allows only authenticated communications. (optional exercise)
@@ -46,34 +47,57 @@ if recv[:3] != '220':
 heloCommand = 'EHLO Hey\r\n'
 clientSocket.send(heloCommand.encode()) #Python 3
 #clientSocket.send(heloCommand) #Python 2.7
-recv1 = clientSocket.recv(1024).decode()
-print(recv1)
-if recv1[:3] != '250':
+recv = clientSocket.recv(1024).decode()
+print(recv)
+if recv[:3] != '250':
 	print('250 reply not received from server.')
 
 # Send MAIL FROM command and print server response.
 # Fill in start
-clientSocket.send()
+mailFromCommand= 'MAIL FROM:'+ fromMail +'\r\n'
+clientSocket.send(mailFromCommand.encode())
 # Fill in end
 
 # Send RCPT TO command and print server response.
 # Fill in start
+rcptCommand= 'RCPT TO:' + toMail +'\r\n'
+clientSocket.send(rcptCommand.encode())
+recv = clientSocket.recv(1024).decode()
+print(recv)
 # Fill in end
 
 # Send DATA command and print server response.
 # Fill in start
+dataCommand= 'DATA\r\n'
+clientSocket.send(dataCommand.encode())
+recv = clientSocket.recv(1024).decode()
+print(recv)
 # Fill in end
 
 # Send message data.
 # Fill in start
+subj = "im a hacker"
+date = time.strftime("%d/%m/%Y")
+msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s"%(fromMail, toMail, subj, date, message_text)
+clientSocket.send(msg.encode())
+recv = clientSocket.recv(1024).decode()
+print(recv)
 # Fill in end
 
 # Message ends with a single period.
 # Fill in start
+clientSocket.send(endmsg.encode())
+recv = clientSocket.recv(1024).decode()
+print(recv)
 # Fill in end
 
 # Send QUIT command and get server response.
 # Fill in start
+quitCommand = "QUIT'\r\n'"
+clientSocket.send(quitCommand.encode())
+
+recv = clientSocket.recv(1024).decode()
+print(recv)
 # Fill in end
 
 #Note that there are more communications if you implement the optional exercise.
